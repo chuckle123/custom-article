@@ -1,0 +1,158 @@
+<html ng-app="imageuploadDemo">
+<head>
+  <title>imageupload Demo</title>
+
+  <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles/custom.css">
+  <link rel="stylesheet" href="angular-gridster/dist/angular-gridster.min.css"/>
+
+</head>
+<body ng-controller="DemoCtrl">
+
+  <div class="container">
+    Edit Mode: {{isEditing}}
+
+    <button ng-click="isEditing = !isEditing">Switch Mode</button>
+
+    <div class="row">
+      <div class="col-sm text-center" id="col1" ng-show="isEditing">
+        <button ng-click="addObject('textarea')">Add Text Area</button>
+        <button ng-click="addObject('image')">Add Image</button>
+        <button ng-click="addObject('header')">Add Header</button>
+      </div>
+    </div>
+  </div>
+
+{{customItems}}
+<div gridster="gridsterOpts">
+    <ul>
+        <li style="border: solid 1px;"gridster-item="customItemMap" ng-repeat="item in customItems">
+          <div class="ddd" style="width: 100%; background: #ddd; padding: 10px 0px">Handle</div>
+
+
+<div id={{$index}}></div>
+
+        </li>
+    </ul>
+</div>
+
+
+  <script src="bootstrap/jquery-3.2.1.slim.min.js" type="text/javascript"></script>
+  <script src="javascripts/angular.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    function auto_grow(element) {
+      element.style.height = "5px";
+      element.style.height = (element.scrollHeight)+"px";
+    }
+
+    // A counter to allow for adding any number of images and track them
+    var imageNumber = 0;
+    var headerNumber = 0;
+    var textNumber = 0;
+
+    angular.module('imageuploadDemo', ['imageupload', 'gridster']).controller('DemoCtrl', function($scope, $http, $compile) {
+
+    $scope.customItems = [];
+
+    // maps the item from customItems in the scope to the gridsterItem options
+    $scope.customItemMap = {
+      sizeX: 'item.sizeX',
+      sizeY: 'item.sizeY',
+      row: 'item.row',
+      col: 'item.col',
+    };
+
+
+    $scope.gridsterOpts = {
+      maxRows: 100,
+      defaultSizeX: 1,
+      defaultSizeY: 1,
+      columns: 2, // the width of the grid, in columns
+      colWidth: 'auto', // can be an integer or 'auto'.  'auto' uses the pixel width of the element divided by 'columns'
+      rowHeight: 'match', // can be an integer or 'match'.  Match uses the colWidth, giving you square widgets.
+      margins: [10, 10], // the pixel distance between each widget
+      //mobileBreakPoint: 600, // if the screen is not wider that this, remove the grid layout and stack the items
+      resizable: {
+        enabled: true,
+        start: function (event, uiWidget, $element) {
+        }, // optional callback fired when resize is started,
+        resize: function (event, uiWidget, $element) {
+        }, // optional callback fired when item is resized,
+        stop: function (event, uiWidget, $element) {
+        } // optional callback fired when item is finished resizing
+      },
+      draggable: {
+        enabled: true, // whether dragging items is supported
+        handle: '.ddd', // optional selector for resize handle
+        start: function (event, uiWidget, $element) {
+        }, // optional callback fired when drag is started,
+        drag: function (event, uiWidget, $element) {
+        }, // optional callback fired when item is moved,
+        stop: function (event, uiWidget, $element) {
+        } // optional callback fired when item is finished dragging
+      }
+    };
+
+
+
+    $scope.isEditing = true;
+
+    $scope.add = function() {
+      $scope.customItems.push({type:'img'});
+    }
+
+
+    $scope.addObject = function(type) {
+      var locationToAppend = $scope.customItems.length;
+
+      if (type === 'textarea') {
+
+        var textId = 'text' + textNumber;
+
+        $scope.customItems.push({ type: 'text' });
+
+        $('#' + locationToAppend).ready(function() {
+          $('#' + locationToAppend).append($compile('<div ng-show="isEditing" style="width: -webkit-fill-available; max-width: -webkit-fill-available;"><textarea onkeyup="auto_grow(this)" ng-model="' + textId + '"></textarea></div><div ng-show="!isEditing" style="width: -webkit-fill-available; max-width: -webkit-fill-available; text-align: left;"><span>{{' + textId + '}}</span></div>')($scope));
+          textNumber++;
+        });
+
+
+      } else if (type === 'image') {
+
+        var imageId = 'img' + imageNumber;
+        // Input for an image
+        var htmlInput = '<div ng-show="isEditing" style="width: -webkit-fill-available; max-width: -webkit-fill-available;"><input id="' + imageId + '" type="file" accept="image/*" image="' + imageId + '" resize-max-height="300" resize-max-width="250" /></div>';
+        // The image itself displayed - show image whether editing page or not
+        htmlInput += '<img ng-src={{' + imageId + '.dataURL}} style="max-width: -webkit-fill-available; height: auto;">';
+
+        $scope.customItems.push({ type: 'img' });
+
+        $('#' + locationToAppend).ready(function() {
+          $('#' + locationToAppend).append($compile(htmlInput)($scope));
+          imageNumber++;
+        });
+
+      } else if (type === 'header') {
+
+        var headerId = 'head' + headerNumber;
+
+        $scope.customItems.push({ type: 'header' });
+
+        $('#' + locationToAppend).ready(function() {
+          $('#' + locationToAppend).append($compile('<div ng-show="isEditing" style="width: -webkit-fill-available; max-width: -webkit-fill-available;"><input type="text" ng-model="' + headerId + '" style="width: -webkit-fill-available; max-width: -webkit-fill-available; font-size: 54px;"></div><div ng-show="!isEditing" style="width: -webkit-fill-available; max-width: -webkit-fill-available; text-align: left;"><span style="width: -webkit-fill-available; max-width: -webkit-fill-available; font-size: 54px;">{{' + headerId + '}}</span></div>')($scope));
+          headerNumber++;
+        });
+
+      }
+    }
+  });
+
+  </script>
+
+  <script src="javascripts/imageupload.js" type="text/javascript"></script>
+  <script src="bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="angular-gridster/dist/angular-gridster.min.js"></script>
+
+  </body>
+</html>

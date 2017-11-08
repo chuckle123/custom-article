@@ -1,0 +1,7 @@
+textarea {
+    resize: none; /* Don't show the dragable resizer in the bottom right corner */
+    overflow: hidden;
+    min-height: 50px;
+    width: inherit;
+    /* max-height: 100px; */
+}
